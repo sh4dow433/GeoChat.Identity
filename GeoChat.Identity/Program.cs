@@ -1,9 +1,9 @@
 using GeoChat.Identity.Api.DbAccess;
 using GeoChat.Identity.Api.EventBus;
 using GeoChat.Identity.Api.AuthExtensions;
-using GeoChat.Identity.Api.RabbitMqEventBus;
 using GeoChat.Identity.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using GeoChat.Identity.Api.RabbitMqEventBus.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

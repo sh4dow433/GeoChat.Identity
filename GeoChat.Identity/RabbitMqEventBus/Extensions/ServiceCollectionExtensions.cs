@@ -2,7 +2,7 @@
 using GeoChat.Identity.Api.RabbitMqEventBus.ConnectionManager;
 using GeoChat.Identity.Api.RabbitMqEventBus.EventsManager;
 
-namespace GeoChat.Identity.Api.RabbitMqEventBus;
+namespace GeoChat.Identity.Api.RabbitMqEventBus.Extensions;
 
 public static class ServiceCollectionExtensions
 {
