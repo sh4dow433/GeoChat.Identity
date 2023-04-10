@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using GeoChat.Identity.Api.Dtos;
 using GeoChat.Identity.Api.Entities;
-using GeoChat.Identity.Api.MessageQueue.Events;
+using GeoChat.Identity.Api.EventBus.Events;
 
 namespace GeoChat.Identity.Api.MappingProfiles
 {
