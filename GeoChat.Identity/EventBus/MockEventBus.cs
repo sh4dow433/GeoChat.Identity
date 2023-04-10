@@ -1,6 +1,5 @@
 ﻿using GeoChat.Identity.Api.EventBus.EventHandlers;
 using GeoChat.Identity.Api.EventBus.Events;
-using RabbitMQ.Client;
 
 namespace GeoChat.Identity.Api.EventBus;
 
