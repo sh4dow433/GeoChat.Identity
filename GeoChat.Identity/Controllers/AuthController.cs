@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using GeoChat.Identity.Api.Dtos;
 using GeoChat.Identity.Api.Entities;
-using GeoChat.Identity.Api.MessageQueue.Events;
-using GeoChat.Identity.Api.MessageQueue.Publisher;
+using GeoChat.Identity.Api.EventBus;
+using GeoChat.Identity.Api.EventBus.Events;
+using GeoChat.Identity.Api.EventBus.Extensions;
 using GeoChat.Identity.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -16,17 +17,20 @@ public class AuthController : ControllerBase
     private readonly IMapper _mapper;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ITokenGenerator _tokenGenerator;
-    private readonly IMqPublisher _mqPublisher;
+	private readonly IEventBus _eventBus;
+    private readonly IConfiguration _configuration;
 
     public AuthController(
 		IMapper mapper, SignInManager<AppUser> signInManager,
 		ITokenGenerator tokenGenerator,
-		IMqPublisher mqPublisher)
+        IEventBus eventBus,
+		IConfiguration configuration)
 	{
 		_mapper = mapper;
 		_signInManager = signInManager;
 		_tokenGenerator = tokenGenerator;
-		_mqPublisher = mqPublisher;
+        _eventBus = eventBus;
+		_configuration = configuration;
 	}
 
 	[HttpPost]
@@ -74,8 +78,7 @@ public class AuthController : ControllerBase
 		var mappedUser = _mapper.Map<UserResponseDto>(user);
 		
 		var newUserCreatedEvent = _mapper.Map<NewAccountCreatedEvent>(user);
-		_mqPublisher.PublishEvent(newUserCreatedEvent);
-
+		_eventBus.PublishNewAccountCreatedEvent(_configuration, newUserCreatedEvent);
 		return Ok(mappedUser);
 	}
 }

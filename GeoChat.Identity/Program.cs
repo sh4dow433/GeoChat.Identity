@@ -1,8 +1,9 @@
 using GeoChat.Identity.Api.DbAccess;
-using GeoChat.Identity.Api.Extensions;
-using GeoChat.Identity.Api.MessageQueue.Publisher;
+using GeoChat.Identity.Api.EventBus;
+using GeoChat.Identity.Api.AuthExtensions;
 using GeoChat.Identity.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using GeoChat.Identity.Api.RabbitMqEventBus.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,15 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 builder.Services.RegisterAuthServices(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddTransient<ITokenGenerator, TokenGenerator>();
-builder.Services.AddTransient<IMqPublisher, MqPublisher>();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddSingleton<IEventBus, MockEventBus>();
+}
+else
+{
+    builder.Services.RegisterEventBus();
+}
 
 builder.Services.AddCors();
 
