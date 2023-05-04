@@ -100,7 +100,7 @@ internal class EventBus : IEventBus
         {
             var handler = scope.ServiceProvider.GetService(handlerType);
             var actualEvent = JsonSerializer.Deserialize(body, eventType);
-            var handlerConcreteType = typeof(IEventHandler<>).MakeGenericType(handlerType);
+            var handlerConcreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
             if (handler == null || actualEvent == null || handlerConcreteType == null)
             {
                 throw new Exception("Couldn't find or couldn't build the handler");
