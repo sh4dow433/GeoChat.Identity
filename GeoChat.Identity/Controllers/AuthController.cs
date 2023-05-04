@@ -76,8 +76,12 @@ public class AuthController : ControllerBase
 		}
 
 		var mappedUser = _mapper.Map<UserResponseDto>(user);
-		
-		var newUserCreatedEvent = _mapper.Map<NewAccountCreatedEvent>(user);
+
+		var newUserCreatedEvent = new NewAccountCreatedEvent()
+		{
+			UserId = user.Id,
+			UserName = user.UserName
+		};
 		_eventBus.PublishNewAccountCreatedEvent(_configuration, newUserCreatedEvent);
 		return Ok(mappedUser);
 	}
