@@ -4,6 +4,10 @@ using GeoChat.Identity.Api.AuthExtensions;
 using GeoChat.Identity.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using GeoChat.Identity.Api.RabbitMqEventBus.Extensions;
+using GeoChat.Identity.Api.Repo;
+using GeoChat.Identity.Api.Entities;
+using GeoChat.Identity.Api.EventBus.EventHandlers;
+using GeoChat.Identity.Api.EventBus.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +19,7 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("AuthDb"));
 });
+builder.Services.AddScoped<IGenericRepo<AppUser>, GenericRepo<AppUser>>();
 
 builder.Services.RegisterAuthServices(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -27,6 +32,7 @@ if (builder.Environment.IsDevelopment())
 else
 {
     builder.Services.RegisterEventBus();
+    builder.Services.AddTransient<SyncCallEventHandler>();
 }
 
 builder.Services.AddCors();
@@ -39,6 +45,13 @@ app.UseCors(builder => builder
          .AllowAnyMethod()
          .AllowCredentials()
      );
+
+if (!app.Environment.IsDevelopment())
+{
+    var bus = app.Services.GetService<IEventBus>();
+    bus.Subscribe<SyncCallEvent, SyncCallEventHandler>();
+}
+
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
