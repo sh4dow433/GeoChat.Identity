@@ -13,7 +13,7 @@ public partial class RabbitMqConnectionManager : IRabbitMqConnectionManager
     private readonly IConnection _connection;
     private readonly IModel _channel;
 
-    private static readonly Dictionary<string, EventingBasicConsumer> _registeredConsumers = new();
+    private readonly Dictionary<string, AsyncEventingBasicConsumer> _registeredConsumers = new();
 
     public event AsyncEventHandler<MessageEventArgs>? EventReceived;
 
@@ -35,7 +35,6 @@ public partial class RabbitMqConnectionManager : IRabbitMqConnectionManager
             UserName = userName,
             Password = password,
             HostName = host,
-            VirtualHost= vhost,
             Port = port
         };
         _connection = factory.CreateConnection();
@@ -53,7 +52,7 @@ public partial class RabbitMqConnectionManager : IRabbitMqConnectionManager
         _channel.QueueBind(queue: queue,
                           exchange: exchange,
                           routingKey: routing);
-        var consumer = new EventingBasicConsumer(_channel);
+        var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.Received += OnReceived;
 
         var consumerTag = _channel.BasicConsume(queue: queue,
@@ -62,8 +61,6 @@ public partial class RabbitMqConnectionManager : IRabbitMqConnectionManager
 
         _registeredConsumers[consumerTag] = consumer;
 
-        Console.WriteLine("----> Consumer registered");
-        
         return consumerTag;
     }
 
@@ -77,13 +74,10 @@ public partial class RabbitMqConnectionManager : IRabbitMqConnectionManager
         _channel.BasicCancel(consumerTag);
         consumer.Received -= OnReceived;
         _registeredConsumers.Remove(consumerTag);
-
-        Console.WriteLine("----> Consumer stopped");
     }
 
-    private void OnReceived(object? model, BasicDeliverEventArgs ea)
+    private async Task OnReceived(object model, BasicDeliverEventArgs ea)
     {
-        Console.WriteLine("---> Message Received");
 
         var routingKey = ea.RoutingKey;
         var exchange = ea.Exchange;
@@ -93,10 +87,7 @@ public partial class RabbitMqConnectionManager : IRabbitMqConnectionManager
         {
             throw new Exception("No event processor was added to the OnReceived event");
         }
-        EventReceived
-            .Invoke(this, new(message, routingKey, exchange))
-            .GetAwaiter()
-            .GetResult();
+        await EventReceived.Invoke(this, new(message, routingKey, exchange));
     }
 
 
@@ -109,12 +100,10 @@ public partial class RabbitMqConnectionManager : IRabbitMqConnectionManager
 
         _channel.Dispose();
         _connection.Dispose();
-
-        Console.WriteLine("---> RabbitMQ Connection disposed");
     }
 
     private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
     {
-        Console.WriteLine("---> RabbitMQ Connection Shutdown");
+        Console.WriteLine("--> RabbitMQ Connection Shutdown");
     }
 }
