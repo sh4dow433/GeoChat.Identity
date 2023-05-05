@@ -69,6 +69,7 @@ public class AuthController : ControllerBase
 		}
 		
 		var user = _mapper.Map<AppUser>(userRegister);
+		user.LastUpdated= DateTime.UtcNow;
 		var result = await _signInManager.UserManager.CreateAsync(user, userRegister.Password);
 		if (result.Succeeded == false) 
 		{
@@ -80,7 +81,7 @@ public class AuthController : ControllerBase
 		var newUserCreatedEvent = new NewAccountCreatedEvent()
 		{
 			UserId = user.Id,
-			UserName = user.UserName
+			UserName = user.UserName!
 		};
 		_eventBus.PublishNewAccountCreatedEvent(_configuration, newUserCreatedEvent);
 		return Ok(mappedUser);

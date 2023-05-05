@@ -43,6 +43,7 @@ internal class EventBus : IEventBus
                 basicProperties: null,
                 body: body
             );
+        Console.WriteLine("---> Event published");
     }
 
     public void Subscribe<TEvent, TEventHandler>()
