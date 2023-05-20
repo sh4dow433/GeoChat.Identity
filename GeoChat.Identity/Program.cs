@@ -49,7 +49,12 @@ app.UseCors(builder => builder
 if (!app.Environment.IsDevelopment())
 {
     var bus = app.Services.GetService<IEventBus>();
+    if (bus == null) throw new Exception("Bus is null");
     bus.Subscribe<SyncCallEvent, SyncCallEventHandler>();
+
+    var dbContext = app.Services.GetService<AppDbContext>();
+    if (dbContext == null) throw new Exception("DbContext is null");
+    dbContext.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

@@ -81,7 +81,8 @@ public class AuthController : ControllerBase
 		var newUserCreatedEvent = new NewAccountCreatedEvent()
 		{
 			UserId = user.Id,
-			UserName = user.UserName!
+			UserName = user.UserName!,
+			Email = user.Email!
 		};
 		_eventBus.PublishNewAccountCreatedEvent(_configuration, newUserCreatedEvent);
 		return Ok(mappedUser);
